@@ -15,3 +15,9 @@ data = json.load(sys.stdin)
 
 #This is specific to you module, so you need to change it accordingly.
 #agent.dump_env()
+NEXT_PUBLIC_API_URL = data.get("NEXT_PUBLIC_API_URL", "http://localhost:3001") 
+ 
+frontend = { 
+ "NEXT_PUBLIC_API_URL" : NEXT_PUBLIC_API_URL ,
+} 
+agent.write_envfile("frontend.env", frontend) 

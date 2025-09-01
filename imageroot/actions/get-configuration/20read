@@ -24,3 +24,30 @@ config["lets_encrypt"] = os.getenv("TRAEFIK_LETS_ENCRYPT") == "True"
 
 # Dump the configuration to stdout
 # json.dump(config, fp=sys.stdout)
+if os.path.exists("frontend.env"): 
+	data = agent.read_envfile("frontend.env") 
+	config["NEXT_PUBLIC_API_URL"] = data.get("NEXT_PUBLIC_API_URL", "http://localhost:3001") 
+else: 
+	config["NEXT_PUBLIC_API_URL"] = "http://localhost:3001" 
+ 
+if os.path.exists("postgres.env"): 
+	data = agent.read_envfile("postgres.env") 
+	config["POSTGRES_PASSWORD"] = data.get("POSTGRES_PASSWORD", "pastevault_dev_password") 
+	config["POSTGRES_DB"] = data.get("POSTGRES_DB", "pastevault") 
+	config["POSTGRES_USER"] = data.get("POSTGRES_USER", "pastevault") 
+else: 
+	config["POSTGRES_DB"] = "pastevault" 
+	config["POSTGRES_USER"] = "pastevault" 
+	config["POSTGRES_PASSWORD"] = "pastevault_dev_password" 
+ 
+if os.path.exists("backend.env"): 
+	data = agent.read_envfile("backend.env") 
+	config["DATABASE_URL"] = data.get("DATABASE_URL", "postgresql://pastevault:pastevault_dev_password@postgres:5432/pastevault") 
+	config["DATABASE_PROVIDER"] = data.get("DATABASE_PROVIDER", "postgresql") 
+	config["CORS_ORIGIN"] = data.get("CORS_ORIGIN", "http://localhost:3000") 
+else: 
+	config["CORS_ORIGIN"] = "http://localhost:3000" 
+	config["DATABASE_URL"] = "postgresql://pastevault:pastevault_dev_password@postgres:5432/pastevault" 
+	config["DATABASE_PROVIDER"] = "postgresql" 
+ 
+json.dump(config, fp=sys.stdout)

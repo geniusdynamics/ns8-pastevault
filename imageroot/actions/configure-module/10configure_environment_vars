@@ -21,3 +21,13 @@ frontend = {
  "NEXT_PUBLIC_API_URL" : NEXT_PUBLIC_API_URL ,
 } 
 agent.write_envfile("frontend.env", frontend) 
+DATABASE_URL = data.get("DATABASE_URL", "postgresql://pastevault:pastevault_dev_password@postgres:5432/pastevault") 
+DATABASE_PROVIDER = data.get("DATABASE_PROVIDER", "postgresql") 
+CORS_ORIGIN = data.get("CORS_ORIGIN", "http://localhost:3000") 
+ 
+backend = { 
+ "DATABASE_URL" : DATABASE_URL ,
+ "DATABASE_PROVIDER" : DATABASE_PROVIDER ,
+ "CORS_ORIGIN" : CORS_ORIGIN ,
+} 
+agent.write_envfile("backend.env", backend) 

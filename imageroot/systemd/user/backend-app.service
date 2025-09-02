@@ -18,7 +18,7 @@ TimeoutStopSec=70
 ExecStartPre=/bin/mkdir -p tmp
 ExecStartPre=/bin/rm -f %t/backend-app.pid %t/backend-app.ctr-id
 ExecStartPre=-runagent discover-smarthost
-ExecStart=/usr/bin/podman run --conmon-pidfile %t/backend-app.pid  --cidfile %t/backend-app.ctr-id --cgroups=no-conmon  --pod-id-file %t/pastevault.pod-id --replace -d --name  backend-app     --env-file backend.env  ${PASTEVAULT_BACKEND_IMAGE}  
+ExecStart=/usr/bin/podman run --conmon-pidfile %t/backend-app.pid  --cidfile %t/backend-app.ctr-id --cgroups=no-conmon  --pod-id-file %t/pastevault.pod-id --replace -d --name  backend-app --env-file backend.env --env-file frontend.env ${PASTEVAULT_BACKEND_IMAGE}  
 ExecStop=/usr/bin/podman stop --ignore --cidfile %t/backend-app.ctr-id -t 10
 ExecReload=/usr/bin/podman kill -s HUP backend-app
 SyslogIdentifier=%u

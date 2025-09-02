@@ -26,13 +26,18 @@ def generate_random_password(length):
 
 # just before starting systemd unit
 # agent.dump_env()
-POSTGRES_DB = data.get("POSTGRES_DB", "pastevault") 
-POSTGRES_USER = data.get("POSTGRES_USER", "pastevault") 
-POSTGRES_PASSWORD = data.get("POSTGRES_PASSWORD", "pastevault_dev_password") 
- 
-postgres = { 
- "POSTGRES_DB" : POSTGRES_DB ,
- "POSTGRES_USER" : POSTGRES_USER ,
- "POSTGRES_PASSWORD" : POSTGRES_PASSWORD ,
-} 
-agent.write_envfile("postgres.env", postgres) 
+POSTGRES_DB = data.get("POSTGRES_DB", "pastevault")
+POSTGRES_USER = data.get("POSTGRES_USER", "pastevault")
+POSTGRES_PASSWORD = generate_random_password(16)
+
+DATABASE_URL = (
+    f"postgresql://pastevault:{POSTGRES_PASSWORD}@postgres-app:5432/pastevault"
+)
+postgres = {
+    "POSTGRES_DB": POSTGRES_DB,
+    "POSTGRES_USER": POSTGRES_USER,
+    "POSTGRES_PASSWORD": POSTGRES_PASSWORD,
+}
+agent.write_envfile("postgres.env", postgres)
+app_config = {"DATABASE_URL": DATABASE_URL, "DATABASE_PROVIDER": "postgresql"}
+agent.write_envfile("backend.env", app_config)

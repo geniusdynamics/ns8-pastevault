@@ -14,6 +14,7 @@ images=()
 repobase="${REPOBASE:-ghcr.io/geniusdynamics}"
 # Configure the image name
 reponame="pastevault"
+app_version="v0.1.5"
 
 # Create a new empty container image
 container=$(buildah from scratch)
@@ -45,7 +46,7 @@ buildah config --entrypoint=/ \
 	--label="org.nethserver.authorizations=traefik@node:routeadm" \
 	--label="org.nethserver.tcp-ports-demand=2" \
 	--label="org.nethserver.rootfull=0" \
-	--label="org.nethserver.images=docker.io/postgres:15 ghcr.io/arc53/pastevault-backend:v0.1.1 ghcr.io/arc53/pastevault-frontend:v0.1.1" \
+	--label="org.nethserver.images=docker.io/postgres:15 ghcr.io/arc53/pastevault-backend:${app_version} ghcr.io/arc53/pastevault-frontend:${app_version}" \
 	"${container}"
 # Commit the image
 buildah commit "${container}" "${repobase}/${reponame}"

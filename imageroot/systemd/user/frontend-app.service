@@ -10,14 +10,12 @@ After=pastevault.service backend-app.service
 
 [Service]
 Environment=PODMAN_SYSTEMD_UNIT=%n
-EnvironmentFile=%S/state/environment
-EnvironmentFile=-%S/state/smarthost.env
-WorkingDirectory=%S/state
+EnvironmentFile=%E/state/environment
+WorkingDirectory=%E/state
 Restart=always
 TimeoutStopSec=70
 ExecStartPre=/bin/mkdir -p tmp
 ExecStartPre=/bin/rm -f %t/frontend-app.pid %t/frontend-app.ctr-id
-ExecStartPre=-runagent discover-smarthost
 ExecStart=/usr/bin/podman run --conmon-pidfile %t/frontend-app.pid  --cidfile %t/frontend-app.ctr-id --cgroups=no-conmon  --pod-id-file %t/pastevault.pod-id --replace -d --name  frontend-app     --env-file frontend.env  ${PASTEVAULT_FRONTEND_IMAGE}  
 ExecStop=/usr/bin/podman stop --ignore --cidfile %t/frontend-app.ctr-id -t 10
 ExecReload=/usr/bin/podman kill -s HUP frontend-app

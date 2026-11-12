@@ -6,14 +6,14 @@
   "categories": [],
   "authors": [
     {
-      "name": "Name Surname",
-      "email": "author@yourmail.org"
+      "name": "Genius Dynamics",
+      "email": "support@genius.ke"
     }
   ],
   "docs": {
     "documentation_url": "https://docs.pastevault.com/",
-    "bug_url": "https://github.com/NethServer/dev",
-    "code_url": "https://github.com/author/ns8-pastevault"
+    "bug_url": "https://github.com/geniusdynamics/ns8-pastevault/issues",
+    "code_url": "https://github.com/geniusdynamics/ns8-pastevault"
   },
-  "source": "ghcr.io/nethserver/pastevault"
+  "source": "ghcr.io/geniusdynamics/pastevault"
 }

@@ -17,7 +17,8 @@ reponame="pastevault"
 # Node.js 25+ no longer ships Corepack, install it from npm
 # renovate: datasource=npm packageName=corepack
 corepack_version=0.36.0
-app_version="v0.1.5"
+# renovate: datasource=docker packageName=ghcr.io/arc53/pastevault-backend
+app_version=v0.1.5
 
 # Create a new empty container image
 container=$(buildah from scratch)
@@ -50,6 +51,7 @@ buildah config --entrypoint=/ \
 	--label="org.nethserver.authorizations=traefik@node:routeadm" \
 	--label="org.nethserver.tcp-ports-demand=2" \
 	--label="org.nethserver.rootfull=0" \
+    --label="org.nethserver.min-core=3.0.0" \
 	--label="org.nethserver.images=docker.io/postgres:18.7 ghcr.io/arc53/pastevault-backend:${app_version} ghcr.io/arc53/pastevault-frontend:${app_version}" \
 	"${container}"
 # Commit the image

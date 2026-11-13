@@ -1,186 +1,123 @@
-# 🗂️ PasteVault - Secure Text Sharing for NethServer 8
+# ns8-pastevault
 
-[![License](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](https://opensource.org/licenses/GPL-3.0)
-[![NethServer 8](https://img.shields.io/badge/NethServer-8-orange.svg)](https://nethserver.github.io/ns8-core/)
-[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com/)
+Module id: `pastevault`. Images are pinned in `build-images.sh` and updated through reviewed changes.
 
-> **PasteVault** is a secure, self-hosted pastebin service for NethServer 8 that allows you to share text snippets, code, and documents with customizable expiration times and access controls.
-
-## ✨ Features
-
-- 🔒 **Secure Sharing** - Host your own pastebin with full control over data
-- ⏰ **Expiration Control** - Set custom expiration times for pastes
-- 🌐 **Web Interface** - Clean, modern web UI for easy management
-- 🔧 **NethServer Integration** - Seamless integration with NS8 ecosystem
-- 🛡️ **SSL/TLS Support** - Automatic HTTPS with Let's Encrypt certificates
-- 📊 **Admin Dashboard** - Monitor and manage your paste vault
-- 🌍 **Multi-language** - Support for multiple languages via Weblate
-- 💾 **Backup & Restore** - Built-in backup capabilities
-
-## 🚀 Quick Start
-
-### Installation
-
-Add the PasteVault module to your NethServer 8 cluster:
+## Install
 
 ```bash
 add-module ghcr.io/geniusdynamics/pastevault:latest 1
 ```
 
-**Expected Output:**
+The command returns the instance id, for example `pastevault1`. Use the id NS8 returns.
 
-```json
-{
-  "module_id": "pastevault1",
-  "image_name": "pastevault",
-  "image_url": "ghcr.io/geniusdynamics/pastevault:latest"
-}
-```
-
-### Configuration
-
-Configure your PasteVault instance (replace `pastevault1` with your instance name):
+## Configure
 
 ```bash
-api-cli run configure-module --agent module/pastevault1 --data - <<EOF
+api-cli run configure-module --agent module/pastevault1 --data - <<'EOF'
 {
-  "host": "pastevault.yourdomain.com",
+  "host": "pastevault.example.org",
   "http2https": true,
-  "lets_encrypt": true
+  "lets_encrypt": false
 }
 EOF
 ```
 
-**Configuration Options:**
+| Parameter | Required | Type | Description |
+|---|---|---|---|
+| `host` | yes | string | Host name for the application, like 'pastevault.domain.org' |
+| `lets_encrypt` | yes | boolean | Request a valid Let's Encrypt certificate. |
+| `http2https` | yes | boolean | Redirect all the HTTP requests to HTTPS |
 
-- `host`: Your fully qualified domain name
-- `http2https`: Enable HTTPS redirection (recommended: `true`)
-- `lets_encrypt`: Request Let's Encrypt SSL certificate (recommended: `true`)
+## Configuration output
 
-### Access Your PasteVault
+`get-configuration` returns: `host`, `lets_encrypt`, `http2https`.
 
-Once configured, access your PasteVault at: `https://pastevault.yourdomain.com`
+## Images
 
-## 📖 Table of Contents
+| Image | Version |
+|---|---|
+| `docker.io/postgres` | `18.7` |
+| `ghcr.io/arc53/pastevault-backend` | `v0.1.5` |
+| `ghcr.io/arc53/pastevault-frontend` | `v0.1.5` |
 
-- [Features](#-features)
-- [Quick Start](#-quick-start)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Management](#-management)
-- [Debugging](#-debugging)
-- [Testing](#-testing)
-- [Contributing](#-contributing)
-- [License](#-license)
+## Network and access
 
-## 🔧 Management
+- Reserves 2 TCP port(s) on the node. The web application is published through Traefik on the configured host name.
+- Runs rootless.
+- Declares these NS8 authorizations: `traefik@node:routeadm`.
 
-### Get Current Configuration
+## Backup
+
+The following paths are included in the NS8 backup (`imageroot/etc/state-include.conf`):
+
+- `state/frontend.env`
+- `state/postgres.env`
+- `volumes/postgresdata`
+- `state/backend.env`
+
+## Services
+
+- `backend-app.service`
+- `frontend-app.service`
+- `pastevault.service`
+- `postgres-app.service`
+
+## Get the configuration
 
 ```bash
 api-cli run get-configuration --agent module/pastevault1
 ```
 
-### Update Module
+## Update and uninstall
 
 ```bash
-api-cli run update-module --data '{
-  "module_url": "ghcr.io/geniusdynamics/pastevault:latest",
-  "instances": ["pastevault1"],
-  "force": true
-}'
-```
-
-### Uninstall
-
-```bash
+api-cli run update-module --data '{"module_url":"ghcr.io/geniusdynamics/pastevault:latest","instances":["pastevault1"],"force":true}'
 remove-module --no-preserve pastevault1
 ```
 
-## 🔍 Debugging
+## Testing
 
-### Environment Variables
+Continuous integration:
 
-Check module environment variables:
+- `Publish images` builds the module image on every push.
+- `Test module` installs the image on a QEMU NS8 node and runs the Robot Framework suite in `tests/`. It runs after `Publish images` succeeds on `dev` and on `main`.
+- `Build API JSON Schema docs` and the security scan run alongside.
 
-```bash
-runagent -m pastevault1 env
-```
+The suite installs the module, configures a host name, checks that the web application answers through Traefik, takes UI screenshots and removes the module.
 
-### Access Module Environment
+Run it locally with the NS8 standard infrastructure described in the [ns8-github-actions README](https://github.com/NethServer/ns8-github-actions/blob/v1/README.md#running-tests-locally).
 
-Become the module agent for debugging:
+## Open items
 
-```bash
-runagent -m pastevault1
-```
+Found by the NS8 module standards check. These must be resolved before a stable release:
 
-### Container Inspection
+- The module description is still the template text: write a description of at least 60 characters in ui/public/metadata.json
+- tests/pastevault.robot generated from template: set real configure payload and URL check
+- metadata: documentation_url is a placeholder
+- metadata: categories empty (use standard categories)
+- metadata: description.en needs >= 60 real chars (+ it translation)
+- backend-app.service: uses %S/state, kickstart uses %E/state
+- frontend-app.service: uses %S/state, kickstart uses %E/state
+- pastevault.service: uses %S/state, kickstart uses %E/state
+- postgres-app.service: uses %S/state, kickstart uses %E/state
+- discover-smarthost still present: remove if the app does not use SMTP
+- backend-app.service: %S/state changed to %E/state (review the bind mounts that remain)
+- frontend-app.service: %S/state changed to %E/state (review the bind mounts that remain)
+- pastevault.service: %S/state changed to %E/state (review the bind mounts that remain)
+- postgres-app.service: %S/state changed to %E/state (review the bind mounts that remain)
+- imageroot/actions/restore-module/80start_services: smarthost lines removed, check the unit still starts
+- imageroot/actions/configure-module/80start_services: smarthost lines removed, check the unit still starts
+- imageroot/systemd/user/backend-app.service: smarthost lines removed, check the unit still starts
+- imageroot/systemd/user/frontend-app.service: smarthost lines removed, check the unit still starts
+- imageroot/systemd/user/postgres-app.service: smarthost lines removed, check the unit still starts
+- PASTEVAULT_BACKEND_IMAGE is used by the module but no image in the label provides it: leftover from the template?
+- PASTEVAULT_FRONTEND_IMAGE is used by the module but no image in the label provides it: leftover from the template?
+- POSTGRES_IMAGE is used by the module but no image in the label provides it: leftover from the template?
 
-List running containers:
+## Upstream
 
-```bash
-runagent -m pastevault1
-podman ps
-```
+Application documentation: https://docs.pastevault.com/
 
-Inspect container environment:
+## License
 
-```bash
-podman exec pastevault-app env
-```
-
-Access container shell:
-
-```bash
-podman exec -ti pastevault-app sh
-```
-
-## 🧪 Testing
-
-Run the test suite using Robot Framework:
-
-```bash
-./test-module.sh <NODE_ADDR> ghcr.io/geniusdynamics/pastevault:latest
-```
-
-## 🌐 Smarthost Integration
-
-PasteVault automatically discovers and integrates with your centralized smarthost setup:
-
-- **Auto-discovery**: The `bin/discover-smarthost` script keeps settings synchronized
-- **Event-driven updates**: Changes to smarthost configuration automatically restart services
-- **Redis integration**: Settings are stored and retrieved from Redis keys
-
-## 🎨 UI & Translations
-
-### Supported Languages
-
-PasteVault supports multiple languages through [Weblate](https://hosted.weblate.org/projects/ns8/):
-
-- English (en)
-- Spanish (es)
-- Italian (it)
-- Basque (eu)
-- Portuguese (pt)
-- Portuguese (Brazil) (pt_BR)
-- German (de)
-
-### Translation Setup
-
-1. Add [GitHub Weblate app](https://docs.weblate.org/en/latest/admin/continuous.html#github-setup) to your repository
-2. Add your repository to [hosted.weblate.org](https://hosted.weblate.org) or contact a NethServer developer
-
-## 📄 License
-
-This project is licensed under the GPL-3.0 License - see the [LICENSE](LICENSE) file for details.
-
-## 📞 Support
-
-- **Documentation**: [NethServer 8 Docs](https://nethserver.github.io/ns8-core/)
-- **Issues**: [GitHub Issues](https://github.com/geniusdynamics/dev/issues)
-- **Discussions**: [NethServer Community](https://community.nethserver.org/)
-
----
-
-**Built with ❤️ for the NethServer 8 ecosystem**
+GPL-3.0-or-later. See [LICENSE](LICENSE).

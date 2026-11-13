@@ -62,7 +62,8 @@ response = agent.tasks.run(
     data={
         "instance": os.environ["MODULE_ID"] + "-api",
         "url": "http://127.0.0.1:" + api_tcp_port,
-        "host": host,
+        # the web client calls the API at https://api.<host> (NEXT_PUBLIC_API_URL)
+        "host": "api." + host,
         "http2https": h2hs,
         "lets_encrypt": le,
     },

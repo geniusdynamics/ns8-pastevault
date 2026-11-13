@@ -10,8 +10,8 @@
 
 [Unit]
 Description=Podman pastevault.service
-Requires=postgres-app.service pastevault-backend-app.service pastevault-frontend-app.service 
-Before=postgres-app.service pastevault-backend-app.service pastevault-frontend-app.service 
+Requires=postgres-app.service backend-app.service frontend-app.service 
+Before=postgres-app.service backend-app.service frontend-app.service 
 
 [Service]
 Environment=PODMAN_SYSTEMD_UNIT=%n
